@@ -1,0 +1,23 @@
+﻿@model Portal.ViewModel.ErrorMessage
+@{
+    Layout = null;
+}
+
+
+<link rel="stylesheet" href="~/css/error.css" />
+
+<div class="cont_principal cont_error_active">
+    <div class="cont_error text-light">
+
+        <h1>@Model.Title</h1>
+        <p>@Model.Message</p>
+        @if (Model.Title == "404")
+        {
+            <p><a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: unset;">Prima pagină / Home Page</a></p>
+        }
+        @*<p>Click <strong><a asp-action="Index" asp-controller="Home" style="text-decoration:none; color:unset;">here</a></strong> to go home</p>*@
+
+    </div>
+    <div class="cont_aura_1"></div>
+    <div class="cont_aura_2"></div>
+</div>

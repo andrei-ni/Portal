@@ -1,0 +1,173 @@
+﻿@model Portal.ViewModel.ApplicationViewModel
+@{
+    ViewData["Title"] = "Add Application | Portal";
+    var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name.ToUpper();
+    @using Microsoft.AspNetCore.Mvc.Localization
+    @inject IViewLocalizer Localizer
+}
+<script src="~/js/EditApplication.js"></script>
+
+<input hidden id="appId" value="@Model?.Application?.Id" />
+
+<div class="d-flex row justify-content-center">
+
+    <div class="col-lg-10" style="padding-right: 3%;">
+
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>@Localizer["Add application"]</h3>
+
+            <div class="lmenu">
+                <div class="aoval">
+                    <img src="~/images/icons/aellipse.png" class="oval" />
+                </div>
+                <a id="robtn" onclick="ChangeContent('RO')" role="button"><img src="~/images/icons/RO.png" style="height:20px"/> RO</a>
+                <a id="enbtn" onclick="ChangeContent('EN')" role="button"><img src="~/images/icons/EN.png" style="height:20px"/>&ensp;EN</a>
+                <a id="jpbtn" onclick="ChangeContent('JA')" role="button"><img src="~/images/icons/JP.png" style="height:20px"/>&ensp;JP</a>
+                <div class="boval">
+                    <img src="~/images/icons/bellipse.png" class="oval" />
+                </div>
+            </div>
+            <input type="hidden" id="currentLang" value="RO" />
+        </div>
+
+        <div class="d-flex gap-5 justify-content-between mt-4">
+            <div class="w-100">
+                <span>@Localizer["Application name"]</span>
+                <input class="custom-input mb-2" placeholder="@Localizer["Enter application name"]" id="nameInput" value="@Model.Application.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "RO")?.Name" />
+                <input hidden id="nameInputEN" value="@Model.Application.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "EN")?.Name" />
+                <input hidden id="nameInputJA" value="@Model.Application.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "JA")?.Name" />
+                <span>@Localizer["Project development link"]</span>
+                <input id="devLink" class="custom-input mb-2" placeholder="@Localizer["Enter project development link"]" value="@Model.Application.DevLink" />
+                <span>@Localizer["Application link"]</span>
+                <input id="appLink" class="custom-input mb-2" placeholder="@Localizer["Enter application link"]" value="@Model.Application.AppLink" />
+                <span>@Localizer["Application manual link"]</span>
+                <input id="manualLink" class="custom-input" placeholder="@Localizer["Enter application manual link"]" value="@Model.Application.ManualLink" />
+            </div>
+            <div class="w-100">
+                <span>@Localizer["Application details"]</span>
+                <textarea class="custom-textarea" maxlength="256" oninput="updateCharacterCount()" placeholder="@Localizer["Enter application details"]" id="detailsInput">@Model.Application.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "RO")?.Description</textarea>
+                <input hidden id="detailsInputEN" value="@Model.Application.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "EN")?.Description" />
+                <input hidden id="detailsInputJA" value="@Model.Application.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "JA")?.Description" />
+            </div>
+
+        </div>
+        <p style="float:right">@Localizer["Charecter limit:"] <span id="charCount"> 256 </span> @Localizer["characters"]</p>
+
+        <div class="d-flex row mt-5" style="margin: 0 auto;">
+
+            <div class="col-5" style="padding:0 !important">
+                <span>@Localizer["Available categories"]</span>
+                <select multiple class="select-multiple-box" id="editFirstListSelect">
+                    @foreach (var cat in Model?.CategoryList ?? Enumerable.Empty<Category>())
+                    {
+                        <option value="@cat.Id">@cat?.ContentDictionary?.FirstOrDefault(x => x?.LanguageCode?.ToUpper() == culture)?.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="flex-column col-2 align-self-center">
+                <div style="margin-left: 40%;">
+                    <button type="button" class="btn btn-primary mb-2" onclick="EditMoveLine()"><i class="bi bi-chevron-double-right"></i></button>
+                    <br />
+                    <button type="button" class="btn btn-primary" onclick="EditRemoveLine()"><i class="bi bi-chevron-double-left"></i></button>
+                </div>
+            </div>
+
+
+
+            <div class="col-5" style="padding:0 !important">
+                <span>@Localizer["Categories added"]</span>
+                <select multiple class="select-multiple-box" id="editSecondListSelect">
+                    @foreach (var cat in Model?.Application.Categories ?? Enumerable.Empty<Category>())
+                    {
+                        <option value="@cat.Id">@cat?.ContentDictionary?.FirstOrDefault(x => x?.LanguageCode?.ToUpper() == culture)?.Name</option>
+                    }
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="col-lg-2" style="padding:0 !important">
+        <div class="d-flex">
+            <div id="iconPreview" class="icon-preview-box-small" ondrop="drop(event)" ondragover="allowDrop(event)" onclick="document.getElementById('fileUpload').click()">
+
+                @if (Model.Application.IconLocation != null)
+                {
+                    <img src="@Model.Application.IconLocation" id="existingIconPreview" style="height:100%; width:100%; padding:15px;" />
+                }
+                else
+                {
+                    <span>@Localizer["Preview"]</span>
+                }
+
+            </div>
+            <input id="fileUpload" type="file" style="display:none;" onchange="previewFile()" />
+            <div class="text-center">
+                <button class="btn btn-secondary mb-2 mt-2" style="max-height: 35px; width:140px;" onclick="document.getElementById('fileUpload').click()">@Localizer["Select icon"]</button>
+                <button class="btn btn-danger" id="deleteButton" style="max-height: 35px; width: 140px;" onclick="deleteIcon()">@Localizer["Delete icon"]</button>
+            </div>
+        </div>
+        <p class="mt-5">@Localizer["Keywords"]</p>
+        <div style="position: relative; display: inline-block; width:100%;">
+            <input class="custom-input" asp-for="KeywordList" id="keywordsInput" placeholder="@Localizer["Enter keywords: #abc"]" onchange="AddKeyword(this.value)" />
+        </div>
+
+        <br />
+
+        @if (Model?.Application?.Keywords?.Count() > 0)
+        {
+            <br />
+            <span class="p-2">@Localizer["Existing keywords"]</span>
+            <div class="mt-2 p-2" id="existingKeywordsContainer">
+                @foreach (var word in Model.Application.Keywords)
+                {
+                    <span onclick="RemoveExistingKeyword('@word.Id', this)" role="button">@word.Word<i class="bi bi bi-x"></i>&ensp;</span>
+                }
+
+            </div>
+            <br />
+
+            <span class="p-2">@Localizer["New keywords"]</span>
+            <div class="mt-2 p-2" id="keywordsContainer"></div>
+        }
+        else
+        {
+            <div class="mt-2 p-2" id="keywordsContainer"></div>
+        }
+
+    </div>
+
+</div>
+
+<br />
+<br />
+<br />
+
+
+<div class="d-flex justify-content-between bottom-0">
+    <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">@Localizer["Cancel"]</a>
+    <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" id="deleteAppBtn" data-appId="@Model.Application.Id">@Localizer["Delete application"]</a>
+    <button class="btn btn-success" onclick="UpdateApplication()">@Localizer["Save"]</button>
+</div>
+
+<!-- Delete App Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel">@Localizer["Confirmation"]</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Localizer["Are you sure about this action?"]
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Close"]</button>
+                <a class="btn btn-danger" id="confirmBtn">@Localizer["Confirm"]</a>
+            </div>
+        </div>
+    </div>
+</div>
+

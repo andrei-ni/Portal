@@ -1,0 +1,66 @@
+﻿@model Portal.ViewModel.HomeViewModel
+@{
+    ViewData["Title"] = "Portal";
+
+    var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name.ToUpper();
+    @using Microsoft.AspNetCore.Mvc.Localization
+    @inject IViewLocalizer Localizer
+
+}
+
+<script src="~/js/HomeIndex.js"></script>
+
+
+<div class="center-searchbox mb-4">
+    <div class="searchbox-wrapper">
+        @*if (Model?.Lines?.Count() >= 1 && !string.IsNullOrEmpty(ViewBag.SearchText))
+            {
+                <i class="bi bi-x-lg" id="searchButton" role="button" style="position: absolute;right: 10px; top: 50%;transform: translateY(-50%);"></i>
+                <input type="text" id="searchInput" autocomplete="off" placeholder="@ViewBag.SearchText" />
+            }
+            else{
+            }*@
+        <input class="searchbox" type="text" id="searchInput" placeholder="@Localizer["Search for category"]" autocomplete="off" />
+        <i class="bi bi-x-lg" id="closeButton" role="button" style="display: none; position: absolute;right: 10px; top: 50%;transform: translateY(-50%);"></i>
+        <i class="bi bi-x-lg" id="closeAdvancedSearchButton" role="button" style="display: none; position: absolute;right: 10px; top: 50%;transform: translateY(-50%);"></i>
+        <div role="button" class="advanced-search-btn" onclick="SearchAdvanced('@System.Threading.Thread.CurrentThread.CurrentCulture.Name.ToUpper()')">@Localizer["Advanced search"]</div>
+        @* <i class="bi bi-search" id="searchButton" role="button" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #DEDEDE;" onclick="NotImplemented()"></i>*@
+    </div>
+</div>
+
+
+
+<div class="d-flex row flex-wrap justify-content-center w-100" style="margin: 0 auto; gap: 4rem;">
+
+    @foreach (var cat in Model.Categories ?? Enumerable.Empty<Category>())
+    {
+        <div class="box" @*onclick="GotoAllAppsPage()"*@ onclick="GotoCategoryAppsPage(@cat.Id)" role="button" onclick="">
+            <img class="box-vector" src="@cat.IconLocation" height="70" width="70" />
+            <br />
+
+            <div class="box-text">
+                <p style="font-size: 20px; font-weight:600">@cat.ContentDictionary?.FirstOrDefault(x => x?.LanguageCode?.ToUpper() == culture)?.Name</p>
+
+                <span style="word-break: break-word;">
+                    @cat.ContentDictionary?.FirstOrDefault(x => x?.LanguageCode?.ToUpper() == culture)?.Description
+                </span>
+            </div>
+
+
+            @if (User.IsInRole("EDIT"))
+            {
+                <div class="box-icons-right">
+                    <a asp-action="EditCategoryIndex" asp-controller="Category" asp-route-id="@cat.Id"><i class="bi bi-pencil-square"></i></a>
+                    <i class="bi bi-arrow-right" @*onclick="GotoAllAppsPage()"*@ onclick="GotoCategoryAppsPage(@cat.Id)" role="button"></i>
+                </div>
+            }
+            else
+            {
+                <div class="box-icon-right">
+                    <i class="bi bi-arrow-right" @*onclick="GotoAllAppsPage()"*@ onclick="GotoCategoryAppsPage(@cat.Id)" role="button"></i>
+                </div>
+            }
+        </div>
+    }
+
+</div>

@@ -1,0 +1,127 @@
+﻿@{
+    @using Microsoft.AspNetCore.Mvc.Localization
+    @inject IViewLocalizer Localizer
+
+    var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+
+    var languageMap = new Dictionary<string, (string, string)>
+{
+        { "ro", ("/images/icons/RO.png", "RO") },
+        { "en", ("/images/icons/EN.png", "EN") },
+        { "ja", ("/images/icons/JP.png", "JP") }
+    };
+
+    var otherLanguages = languageMap.Where(x => x.Key != culture).ToList();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/toastify.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Portal.styles.css" asp-append-version="true" />
+
+    <script src="~/js/app/jquery.js"></script>
+    <script src="~/js/app/jqueryUI.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    @*<script src="~/js/app/backToTop.js"></script>*@
+    <script src="~/js/app/logoGoBackBtn.js"></script>
+    <script src="~/js/app/dropdownBtns.js"></script>
+    <script src="~/js/app/notImplemented.js"></script>
+    <script src="~/js/app/toastify.js" asp-append-version="true"></script>
+    <script src="~/js/app/site.js" asp-append-version="true"></script>
+
+</head>
+<body>
+    <header>
+
+        <div class="headr">
+            <div style="height: 110px;" id="logo">
+                <a asp-area="" asp-controller="Home" asp-action="Index"> <img src="~/images/logo.png" class="logo" /></a>
+                @if (!(ViewContext.RouteData.Values["controller"].ToString().Equals("Home", StringComparison.OrdinalIgnoreCase) && ViewContext.RouteData.Values["action"].ToString().Equals("Index", StringComparison.OrdinalIgnoreCase)))
+                {
+                    <a asp-area="" asp-controller="Home" asp-action="Index"><div class="home-btn" role="button" id="home-btn"><i class="bi bi-arrow-left-short"></i>@Localizer["Back home"]</div></a>
+                }
+            </div>
+            <div style="margin-top:20px;">
+                <a asp-area="" asp-controller="Home" asp-action="Index"> <p class="title">@Localizer["Manufacturing Romania Portal"]</p></a>
+            </div>
+
+
+            <div class="menu">
+
+                @*CUSTOM DROPDOWN*@
+                <div>
+                    <button id="language-dropdown-button" class="btn" onclick="toggleLanguageDropdown()">
+                        <div style="display:flex; align-items:center; gap: 5px">
+                            <img src="@languageMap[culture].Item1" style="height:25px" /> <span style="font-size: 22px;">@languageMap[culture].Item2</span>
+                        </div>
+
+                    </button>
+                    <div id="language-dropdown-content" class="dropdown-content">
+                        @foreach (var lang in otherLanguages)
+                        {
+                            <a asp-controller="Home" asp-action="SetLanguageIndex" asp-route-culture="@lang.Key">
+                                <img src="@lang.Value.Item1" style="height:25px" /><span style="font-size: 22px;">&ensp;@lang.Value.Item2</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                @if (User.IsInRole("EDIT"))
+                {
+                    <div style="margin-right: 15px;">
+                        <button id="dropdown-button" class="btn" onclick="togglePanelDropdown()">
+                            <img src="~/images/icons/MenuButton.png" />
+                        </button>
+                        <div id="dropdown-content" class="dropdown-content">
+                            <a asp-controller="Application" asp-action="AddApplicationIndex">@Localizer["Add application"]</a>
+                            <a asp-controller="Category" asp-action="AddCategoryIndex">@Localizer["Add category"]</a>
+                            <a asp-controller="AppUser" asp-action="Index">@Localizer["Users"]</a>
+                        </div>
+                    </div>
+                }
+                @* BOOTSTRAP DROPDOWN
+                                <div class="dropdown">
+                        <a class="btn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="~/images/icons/MenuButton.png" />
+                        </a>
+
+                        <ul class="dropdown-menu" id="panel-menu">
+                            <li><a class="dropdown-item" asp-controller="Application" asp-action="AddApplication">Add application</a></li>
+                            <li><a class="dropdown-item" asp-controller="Category" asp-action="AddCategory">Add category</a></li>
+                            <li><a class="dropdown-item" asp-controller="AppUser" asp-action="Index">Users</a></li>
+                        </ul>
+                    </div>*@
+
+                <a @*href="@Url.Action("DownloadAppManual", "Home")" download*@ onclick="NotImplemented()"><i class="bi bi-question-circle" id="downloadManualIcon" role="button"></i></a>
+            </div>
+
+
+
+        </div>
+
+    </header>
+    <div class="main-container">
+        <main role="main" @*class="pb-3"*@>
+            @RenderBody()
+        </main>
+    </div>
+
+    @*<i id="backToTop" role="button" class="bi bi-arrow-up btt" onclick="topFunction()"></i>*@
+
+    <div class="footr">
+        <p>@Localizer["Hello"] @User.Identity?.Name?.Substring(User.Identity.Name.IndexOf(@"\") + 1)</p>
+        <p>&copy; @DateTime.Now.Year Portal - @Localizer["Designed & Developed by Production Systems"]</p>
+    </div>
+
+    @await Component.InvokeAsync("Notyf")
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

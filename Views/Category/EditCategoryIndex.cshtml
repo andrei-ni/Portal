@@ -1,0 +1,162 @@
+﻿@model Portal.ViewModel.CategoryViewModel
+@{
+    ViewData["Title"] = "Add Category | Portal";
+    var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name.ToUpper();
+    @using Microsoft.AspNetCore.Mvc.Localization
+    @inject IViewLocalizer Localizer
+}
+
+<script src="~/js/EditCategory.js"></script>
+
+<input hidden id="catId" value="@Model?.Category?.Id" />
+
+<div class="d-flex row justify-content-center">
+
+    <div class="col-lg-10" style="padding-right: 3%;">
+
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>@Localizer["Add category"]</h3>
+
+            <div class="lmenu">
+                <div class="aoval">
+                    <img src="~/images/icons/aellipse.png" class="oval" />
+                </div>
+                <a id="robtn" onclick="ChangeContent('RO')" role="button"><img src="~/images/icons/RO.png" style="height:20px" /> RO</a>
+                <a id="enbtn" onclick="ChangeContent('EN')" role="button"><img src="~/images/icons/EN.png" style="height:20px" />&ensp;EN</a>
+                <a id="jpbtn" onclick="ChangeContent('JA')" role="button"><img src="~/images/icons/JP.png" style="height:20px" />&ensp;JP</a>
+                <div class="boval">
+                    <img src="~/images/icons/bellipse.png" class="oval" />
+                </div>
+            </div>
+            <input type="hidden" id="currentLang" value="RO" />
+
+        </div>
+
+        <div class="d-flex gap-5 justify-content-between mt-4">
+            <div class="w-100">
+                <span>@Localizer["Category name"]</span>
+                <input class="custom-input" id="nameInput" maxlength="30" placeholder="@Localizer["NamePlaceholder"]" value="@Model.Category.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "RO")?.Name" />
+                <input hidden id="nameInputEN" value="@Model.Category.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "EN")?.Name" />
+                <input hidden id="nameInputJA" value="@Model.Category.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "JA")?.Name" />
+            </div>
+            <div class="w-100">
+                <span>@Localizer["Category details"]</span>
+                <input class="custom-input" id="detailsInput" maxlength="100" oninput="updateCharacterCount()" placeholder="@Localizer["DescriptionPlaceholder"]" value="@Model.Category.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "RO")?.Description" />
+                <input hidden id="detailsInputEN" value="@Model.Category.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "EN")?.Description" />
+                <input hidden id="detailsInputJA" value="@Model.Category.ContentDictionary.FirstOrDefault(x => x.LanguageCode == "JA")?.Description" />
+            </div>
+
+        </div>
+        <p style="float:right">@Localizer["Charecter limit:"] <span id="charCount"> 100 </span> @Localizer["characters"]</p>
+
+
+        <div class="d-flex row mt-5" style="margin: 0 auto;">
+
+            <div class="col-5" style="padding:0 !important">
+                <span>@Localizer["Available apps"]</span>
+                <select multiple class="select-multiple-box" id="editFirstListSelect">
+                    @foreach (var app in Model?.ApplicationList ?? Enumerable.Empty<Application>())
+                    {
+                        <option value="@app.Id">@app?.ContentDictionary?.FirstOrDefault(x => x?.LanguageCode?.ToUpper() == culture)?.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="flex-column col-2 align-self-center">
+                <div style="margin-left: 40%;">
+                    <button type="button" class="btn btn-primary mb-2" onclick="EditMoveLine()"><i class="bi bi-chevron-double-right"></i></button>
+                    <br />
+                    <button type="button" class="btn btn-primary" onclick="EditRemoveLine()"><i class="bi bi-chevron-double-left"></i></button>
+                </div>
+            </div>
+
+
+
+            <div class="col-5" style="padding:0 !important">
+                <span>@Localizer["Apps added"]</span>
+                <select multiple class="select-multiple-box" id="editSecondListSelect">
+                    @foreach (var app in Model?.Category.Applications ?? Enumerable.Empty<Application>())
+                    {
+                        <option value="@app.Id">@app?.ContentDictionary?.FirstOrDefault(x => x?.LanguageCode?.ToUpper() == culture)?.Name</option>
+                    }
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="col-lg-2" style="padding:0 !important">
+
+
+        <div class="d-flex">
+            <div id="iconPreview" class="icon-preview-box-small" ondrop="drop(event)" ondragover="allowDrop(event)" onclick="document.getElementById('fileUpload').click()">
+                @if (Model.Category.IconLocation != null)
+                {
+                    <img src="@Model.Category.IconLocation" id="existingIconPreview" style="height:100%; width:100%; padding:15px;" />
+                }
+                else
+                {
+                    @Localizer["Preview"]
+                }
+            </div>
+            <input id="fileUpload" type="file" style="display:none;" onchange="previewFile()" />
+            <div class="text-center">
+                <button class="btn btn-secondary mb-2 mt-2" style="max-height: 35px; width: 140px;" onclick="document.getElementById('fileUpload').click()">@Localizer["Select icon"]</button>
+                <button class="btn btn-danger" id="deleteButton" style="max-height: 35px; width: 140px;" onclick="deleteIcon()">@Localizer["Delete icon"]</button>
+            </div>
+        </div>
+
+
+        @* Large icon placeholder
+                <div class="row gap-4">
+                <div id="iconPreview" class="icon-preview-box" ondrop="drop(event)" ondragover="allowDrop(event)">
+
+                    @if (Model.Category.IconLocation != null)
+                    {
+                        <img src="@Model.Category.IconLocation" id="existingIconPreview" style="height:100%; width:100%; padding:15px;" />
+                    }
+                    else
+                    {
+                        @Localizer["IconPreviewPlaceholder"]
+                    }
+
+                </div>
+                <input id="fileUpload" type="file" style="display:none;" onchange="previewFile()" />
+                <button class="btn btn-secondary" style="height:45px;" onclick="document.getElementById('fileUpload').click()">@Localizer["Select icon"]</button>
+                <button id="deleteButton" class="btn btn-danger" style="height:35px;" onclick="deleteIcon()">@Localizer["Delete icon"]</button>
+            </div>*@
+
+    </div>
+
+</div>
+
+<div style="height: 15vh;"></div>
+
+
+
+<div class="d-flex justify-content-between bottom-0">
+    <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">@Localizer["Cancel"]</a>
+    <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" id="deleteCategoryBtn" data-categoryid="@Model.Category.Id">@Localizer["Delete category"]</a>
+    <button class="btn btn-success" onclick="UpdateCategory()">@Localizer["Save"]</button>
+</div>
+
+<!-- Delete Category Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel">@Localizer["Confirmation"]</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label=""></button>
+            </div>
+            <div class="modal-body">
+                @Localizer["Are you sure about this action?"]
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Close"]</button>
+                <a class="btn btn-danger" id="confirmBtn">@Localizer["Confirm"]</a>
+            </div>
+        </div>
+    </div>
+</div>
+

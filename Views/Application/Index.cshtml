@@ -1,0 +1,64 @@
+﻿@model Portal.ViewModel.ApplicationViewModel
+@{
+    ViewData["Title"] = "All application | Portal";
+    var culture = System.Threading.Thread.CurrentThread.CurrentCulture.Name.ToUpper();
+    @using Microsoft.AspNetCore.Mvc.Localization
+    @inject IViewLocalizer Localizer
+}
+
+
+<script src="~/js/ApplicationIndex.js"></script>
+
+
+<div class="center-searchbox">
+    <div class="searchbox-wrapper">
+        @*if (Model?.Lines?.Count() >= 1 && !string.IsNullOrEmpty(ViewBag.SearchText))
+        {
+            <i class="bi bi-x-lg" id="searchButton" role="button" style="position: absolute;right: 10px; top: 50%;transform: translateY(-50%);"></i>
+            <input type="text" id="searchInput" autocomplete="off" placeholder="@ViewBag.SearchText" />
+        }
+        else{
+        }*@
+        <input class="searchbox" type="text" id="searchInput" placeholder="@Localizer["Search for application"]" autocomplete="off" />
+        <i class="bi bi-x-lg" id="closeButton" role="button" style="display: none; position: absolute;right: 10px; top: 50%;transform: translateY(-50%);"></i>
+        @*<i class="bi bi-search" id="searchButton" role="button" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #DEDEDE;" onclick="NotImplemented()"></i>*@
+    </div>
+</div>
+
+<br />
+<br />
+<br />
+
+<div class="d-flex row flex-wrap justify-content-center w-100" style="margin: 0 auto; gap: 4rem;">
+    @foreach (var app in Model.Applications ?? Enumerable.Empty<Application>())
+    {
+        <div class="tall-box" role="button" onclick="window.open('@app.AppLink', '_blank')">
+            <div class="tall-box-icon-top-left">
+                <a href="@app.DevLink" target="_blank"><i class="bi bi-exclamation-circle" role="button"></i></a>
+            </div>
+            <div class="tall-box-icon-top-right">
+                <a asp-action="EditApplicationIndex" asp-controller="Application" asp-route-id="@app.Id"><i class="bi bi-pencil-square" onclick="event.stopPropagation();"></i></a>
+            </div>
+
+            <img class="tall-box-vector" src="@app.IconLocation" height="70" width="70" />
+            <br />
+
+            <div class="tall-box-text">
+                <p style="font-size: 20px; font-weight:600">@app.ContentDictionary?.FirstOrDefault(x => x?.LanguageCode?.ToUpper() == culture)?.Name</p>
+
+                <span style="word-break: break-all;">
+                    @app.ContentDictionary?.FirstOrDefault(x => x?.LanguageCode?.ToUpper() == culture)?.Description
+                </span>
+            </div>
+            <div class="tall-box-icon-bottom-left">
+                <a href="@app.ManualLink" download><i class="bi bi-question-circle" role="button" onclick="event.stopPropagation();"></i></a>
+            </div>
+            <div class="tall-box-icon-bottom-right">
+                <a href="@app.AppLink" target="_blank"><i class="bi bi-arrow-right" role="button" onclick="event.stopPropagation();"></i></a>
+            </div>
+
+        </div>
+    }
+
+</div>
+

@@ -1,0 +1,164 @@
+﻿@model Portal.ViewModel.AppUsersViewModel
+@{
+    ViewData["Title"] = "Users | Portal";
+    @using Microsoft.AspNetCore.Mvc.Localization
+    @inject IViewLocalizer Localizer
+}
+
+<script src="~/js/Users.js"></script>
+
+
+<div class="center-searchbox">
+    <div class="searchbox-wrapper">
+        <input class="searchbox" type="text" id="searchInput" placeholder="@Localizer["Search for user"]" autocomplete="off" />
+        <i class="bi bi-x-lg" id="closeButton" role="button" style="display: none; position: absolute;right: 10px; top: 50%;transform: translateY(-50%);"></i>
+        @*<i class="bi bi-search" id="searchButton" role="button" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #DEDEDE;" onclick="NotImplemented()"></i>*@
+    </div>
+</div>
+
+<br />
+<br />
+
+<div style="text-align:right;">
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">@Localizer["Add user"]</button>
+</div>
+<br />
+
+<div class="list-container">
+
+    <div>
+        <table class="table" id="linesTable">
+            <thead class="sticky-top bg-white">
+                <tr>
+                    <th scope="col">@Localizer["Employee name"]</th>
+                    <th scope="col">@Localizer["Employee ID"]</th>
+                    <th scope="col">@Localizer["Assigned role"]</th>
+                    <th scope="col">@Localizer["Actions"]</th>
+
+                </tr>
+            </thead>
+            <tbody id="linesTableBody">
+                @if (Model is not null)
+                {
+                    foreach (var user in Model.UsersList)
+                    {
+                        <tr style="border-color: #fff;">
+                            <td style="text-align:left;">@user.Name</td>
+                            <td>@user.BadgeNo</td>
+                            @*<td>@user?.Role?.Role</td>*@
+                            <td>@Localizer["Editor"]</td>
+
+                            <td>
+
+                                @*<i class="bi bi-eye action-btn me-3" role="button" onclick="NotImplemented()"></i>
+                                    <i class="bi bi-pencil-square action-btn me-3" role="button" onclick="NotImplemented()"></i>*@
+                                <i class="bi bi-trash action-btn-danger" role="button"
+                                   user-Id="@user.Id"
+                                   user-Name="@user.Name"
+                                   user-BadgeNo="@user.BadgeNo"
+                                   onclick="AppUserDeleteFunction(this)"></i>
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@*MODAL ADD USER *@
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 40%;">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 1px solid #008A99;">
+                <h4>@Localizer["Add user"]</h4>
+
+            </div>
+            <div class="modal-body" style="min-height: 160px;">
+                <div style="padding-top:10px;"></div>
+                @*<div style=" width: 100%; display: flex; justify-content: center;">*@
+                <div style="position: relative; display: inline-block; width: 100%; margin-bottom: 10px;">
+
+                    <span class="small-spinner" id="spinner" style="display:none;position: absolute;left: 10px; top: 30%;transform: translateY(-50%);"></span>
+                    <input class="searchbox" type="text" id="searchUserInput" autocomplete="off" placeholder="Search by employee id or name" style="height:70px;" />
+                </div>
+                <input type="hidden" id="userId" value="">
+
+                <div id="formDiv" style="display:none;">
+                    <form asp-action="AddUser">
+                        @*<div asp-validation-summary="ModelOnly" class="text-danger"></div>*@
+                        <div class="tall-input-box-disabled">
+                            <label asp-for="User.Name" class="control-label">@Localizer["Name"]</label>
+                            <input class="input-no-border-disabled" asp-for="User.Name" id="Name" readonly />
+                        </div>
+                        <div class="tall-input-box-disabled">
+                            <label asp-for="User.BadgeNo" class="control-label">@Localizer["Badge number"]</label>
+                            <input class="input-no-border-disabled" asp-for="User.BadgeNo" id="EmployeeID" readonly />
+                        </div>
+                        <div class="tall-input-box-disabled">
+                            <label asp-for="User.AdIdentity" class="control-label">@Localizer["Username"]</label>
+                            <input class="input-no-border-disabled" asp-for="User.AdIdentity" id="AdUsername" readonly />
+                        </div>
+
+                        <input hidden asp-for="User.Email" id="Email" />
+
+                        <div class="tall-input-box-disabled">
+                            <label asp-for="User.Role.Role" class="control-label">@Localizer["Role"]</label>
+                            <input class="input-no-border-disabled" asp-for="User.Role.Role" id="AdUsername" value="Editor" readonly />
+                        </div>
+
+                        <br />
+                        <div class="form-group w-100">
+                            <input type="submit" value="@Localizer["Create"]" class="btn btn-success" style="width:80%;" />
+                            <input role="button" class="btn btn-secondary" data-bs-dismiss="modal" style="width:19%;" Value="@Localizer["Close"]" />
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+            @*<div class="modal-footer border-0 d-flex">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>*@
+        </div>
+    </div>
+</div>
+
+
+@*MODAL DELETE USER *@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 40%;">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 1px solid #008A99;">
+                <h4>@Localizer["Confirm deletion"]</h4>
+
+            </div>
+            <div class="modal-body">
+
+                <div style="padding-top:15px;"></div>
+
+                <input id="delModalUserId" hidden />
+
+                <div class="tall-input-box-disabled">
+                    <label class="control-label">@Localizer["Name"]</label>
+                    <input class="input-no-border-disabled" id="delModalName" readonly />
+                </div>
+                <div class="tall-input-box-disabled">
+                    <label class="control-label">@Localizer["Badge number"]</label>
+                    <input class="input-no-border-disabled" id="delModalBadgeNo" readonly />
+                </div>
+
+                <br />
+
+                <div class="form-group w-100">
+                    <input class="btn btn-danger" style="width:80%;" id="deleteBtn" value="@Localizer["Delete"]" />
+                    <input role="button" class="btn btn-secondary" data-bs-dismiss="modal" style="width:19%;" Value="@Localizer["Close"]" />
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
